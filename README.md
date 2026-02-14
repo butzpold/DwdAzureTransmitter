@@ -1,4 +1,5 @@
 # DwdAzureTransmitter
+####Read out /stationOverviewExtended from https://dwd.api.bund.dev/ and transform the crawled json-Files in a proper way to send it to an Azure SQL Server.
 
 ### App Architecture
 program.cs                 <br> 
