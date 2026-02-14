@@ -1,24 +1,24 @@
 # DwdAzureTransmitter
 
 ### App Architecture
-program.cs
-|
-Services/
-├── ProperyPrinter.cs
-├── Import/
-│   ├── DwdApiClient.cs
-│   └── DwdApiParser.cs
-│
-├── Transformation/
-│   └── DwdDtoConverter.cs
-│
-├── Export/
-│   └── SqlWeatherWriter.cs
-│
-Domains/
-├── DwdApiModels.cs
-└── WeatherRecord.cs
-│
-Models/
-├── Meassurements.cs
-└── StationData.cs
+program.cs                 <br> 
+│                          <br>
+Services/                  <br>
+├── ProperyPrinter.cs      <br>
+├── Import/                <br>
+│   ├── DwdApiClient.cs    <br>
+│   └── DwdApiParser.cs    <br>
+│                          <br>
+├── Transformation/        <br>
+│   └── DwdDtoConverter.cs <br>
+│                          <br>
+├── Export/                <br>
+│   └── SqlWeatherWriter.cs<br>
+│                          <br>
+Domains/                   <br>
+├── DwdApiModels.cs        <br>
+└── WeatherRecord.cs       <br>
+│                          <br>
+Models/                    <br>
+├── Meassurements.cs       <br>
+└── StationData.cs         <br>
