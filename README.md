@@ -14,7 +14,8 @@ Services/                  <br>
 │   └── DwdDtoConverter.cs <br>
 │                          <br>
 ├── Export/                <br>
-│   └── SqlWeatherWriter.cs<br>
+│   └── SqWriter.cs        <br>
+│   └── AzureClient.cs     <br>
 │                          <br>
 Domains/                   <br>
 ├── DwdApiModels.cs        <br>
