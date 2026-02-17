@@ -1,16 +1,43 @@
-﻿using ApiJsonSqlServer.Services;
+﻿using ApiJsonSqlServer.Domain;
+using ApiJsonSqlServer.Services;
+using ApiJsonSqlServer.Services.Export;
 using ApiJsonSqlServer.Services.Import;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace ApiJsonSqlServer
 {
     internal class Program
-    {
+    {        
         static async Task Main(string[] args)
         {
+            // Sets the connection to the Azure DB
+            var host = Host.CreateDefaultBuilder(args)
+                .ConfigureServices((context, services) =>
+                {
+                    services.AddDbContext<AzureDbContext>(options =>
+                        options.UseSqlServer(
+                            // the Connetion String is defined in the appsettings.json
+                            context.Configuration.GetConnectionString("AzureSql")));
+
+                    services.AddScoped<AzureDbClient>();
+                    services.AddScoped<AzureDbExportService>();
+                    services.AddScoped<DwdApiClient>();
+                })
+                .Build();
+
+            var dwdClient = host.Services.GetRequiredService<DwdApiClient>();
+            var exportService = host.Services.GetRequiredService<AzureDbExportService>();         
+            
+            // DWD Download
             string filepath = "WeatherStations_API.csv";
 
-            var stations = CsvReader.Read(filepath);     
-            
+            var stations = CsvReader.Read(filepath);
+
+            var dailyRecords = new List<WeatherRecord>();
+
             var dwdApiClient = new DwdApiClient();
 
             int Count = 0;
@@ -22,24 +49,23 @@ namespace ApiJsonSqlServer
             {
                 try
                 {
-                    // JSON von API holen
+                    // getting the according json-File from the API
                     string json = await dwdApiClient.GetStationDataAsync(station.StationKe);
 
-                    // JSON in RootResponse deserialisieren
+                    // deserializing the json-File (in a dictionnary)
                     var jsonParsed = DwdApiParser.Parse(json);
-
-                    //Console.Write(json);   
-
-                    jsonParsed.PrintDictionary();
 
                     if (jsonParsed.TryGetValue(station.StationKe, out var stationData))
                     {
+                        // just taking the needed entries out of the dictionnary 
+                        // and creating an object out of it
                         var latestData = stationData.Meassurements?.FirstOrDefault();
                         if (latestData != null)
                         {
+                            // converting the datatypes of the object and appending the StationId
+                            // to prepare the Data for the upload
                             var record = DwdDtoConverter.Map(station.StationId, latestData);
-                            latestData.PrintProperties();
-                            record.PrintProperties();
+                            dailyRecords.Add(record);
                         }
                     }
 
@@ -51,8 +77,10 @@ namespace ApiJsonSqlServer
                 {
                     Console.WriteLine($"Error for {station.StationKe}: {ex.Message}");
                 }
-                break;
             }
+            // starts uploading to DB after all dailyRecords collected            
+            await exportService.ExportAsync(dailyRecords);
+
             //Console.Clear();
             Console.WriteLine("ApiParameterFetcher");
             Console.WriteLine("------------------");
@@ -63,7 +91,6 @@ namespace ApiJsonSqlServer
             Console.Write("Press any Key to quit");
 
             Console.ReadKey();
-
         }
     }
 }

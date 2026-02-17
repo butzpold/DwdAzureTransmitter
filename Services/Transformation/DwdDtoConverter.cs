@@ -1,30 +1,37 @@
 ﻿using ApiJsonSqlServer.Domain;
 using ApiJsonSqlServer.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ApiJsonSqlServer.Services
 {
     internal class DwdDtoConverter
     {
-    public static WeatherRecord Map(int stationId, Meassurements day)
+        private static TimeOnly ConvertUnixMsToTime(long unixMs) =>
+            TimeOnly.FromDateTime(
+                DateTimeOffset
+                    .FromUnixTimeMilliseconds(unixMs)
+                    .ToLocalTime()
+                    .DateTime
+                );
+        private static double ScaleToDouble(int value) => value / 10.0;
+        private static int ScaleToInt(int value) 
+            => (int)Math.Round(ScaleToDouble(value), MidpointRounding.AwayFromZero);
+
+
+        public static WeatherRecord Map(int stationId, Meassurements day)
         {
             return new WeatherRecord
             {
                 StationId = stationId,
                 Date = DateOnly.Parse(day.Date),
-                TemperatureMin = day.TemperatureMin,
-                TemperatureMax = day.TemperatureMax,
-                Precipation = day.Precipitation,
-                WindSpeed = day.WindSpeed,
-                WindGust = day.WindGust,
-                WindDirection = day.WindDirection,
-                Sunshine = day.Sunshine,
-                Sunrise = DateTimeOffset.FromUnixTimeSeconds(day.SunriseUnix/1000).UtcDateTime.ToString("HH:mm:ss"),
-                Sunset = DateTimeOffset.FromUnixTimeSeconds(day.SunsetUnix/1000).UtcDateTime.ToString("HH:mm:ss"),
+                TemperatureMin = ScaleToDouble(day.TemperatureMin),
+                TemperatureMax = ScaleToDouble(day.TemperatureMax),
+                Precipation = ScaleToDouble(day.Precipitation),
+                WindSpeed = ScaleToInt(day.WindSpeed),
+                WindGust = ScaleToInt(day.WindGust),
+                WindDirection = ScaleToInt(day.WindDirection),
+                Sunshine = TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(ScaleToInt(day.Sunshine))),
+                Sunrise = ConvertUnixMsToTime(day.SunriseUnix),                                   
+                Sunset = ConvertUnixMsToTime(day.SunsetUnix),
                 MoonPhase = day.MoonPhase,
             };
         }
