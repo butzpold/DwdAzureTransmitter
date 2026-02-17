@@ -2,7 +2,7 @@
 #### c# Console-App, reading out /stationOverviewExtended from https://dwd.api.bund.dev/ and transforms the crawled json-Files in a proper way to send it to an Azure SQL Server, respectively appends new data to the corresponding table.
 
 ### App Architecture
-program.cs  (console output, orchestration, entity framework)               						<br> 
+program.cs (console output, orchestration, entity framework)    	<br> 
 │                          						<br>
 Services/                  						<br>
 ├── ProperyPrinter.cs      						<br>
