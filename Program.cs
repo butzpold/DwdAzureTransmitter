@@ -13,7 +13,7 @@ namespace ApiJsonSqlServer
     {        
         static async Task Main(string[] args)
         {
-            // Sets the connection to the Azure DB
+            // Setting up the Entity Framework (sets the connection to the Azure DB) 
             var host = Host.CreateDefaultBuilder(args)
                 .ConfigureServices((context, services) =>
                 {
