@@ -25,5 +25,5 @@ Domains/                   						<br>
 Models/                    						<br>
 ├── Meassurements.cs       						<br>
 └── StationData.cs         						<br>
-│
+│                                     <br>
 appsettings.json (containing the connection string)
