@@ -1,13 +1,14 @@
-﻿using ApiJsonSqlServer.Domain;
-using ApiJsonSqlServer.Services;
-using ApiJsonSqlServer.Services.Export;
-using ApiJsonSqlServer.Services.Import;
+﻿using DwdAzureSqlDataTransmitter.Domain;
+using DwdAzureSqlDataTransmitter.Services;
+using DwdAzureSqlDataTransmitter.Services.Export;
+using DwdAzureSqlDataTransmitter.Services.Import;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace ApiJsonSqlServer
+namespace DwdAzureSqlDataTransmitter
+
 {
     internal class Program
     {        
@@ -20,8 +21,14 @@ namespace ApiJsonSqlServer
                     services.AddDbContext<AzureDbContext>(options =>
                         options.UseSqlServer(
                             // the Connetion String is defined in the appsettings.json
-                            context.Configuration.GetConnectionString("AzureSql")));
-
+                            context.Configuration.GetConnectionString("AzureSql"),
+                            sqlOptions =>
+                            {
+                                sqlOptions.EnableRetryOnFailure(
+                                    maxRetryCount: 5,
+                                    maxRetryDelay: TimeSpan.FromSeconds(10),
+                                    errorNumbersToAdd: null);
+                            }));
                     services.AddScoped<AzureDbClient>();
                     services.AddScoped<AzureDbExportService>();
                     services.AddScoped<DwdApiClient>();
@@ -40,7 +47,7 @@ namespace ApiJsonSqlServer
 
             var dwdApiClient = new DwdApiClient();
 
-            int Count = 0;
+            int countImport = 0;
 
             Console.WriteLine("ApiParameterFetcher");
             Console.WriteLine("------------------");
@@ -62,6 +69,7 @@ namespace ApiJsonSqlServer
                         var latestData = stationData.Meassurements?.FirstOrDefault();
                         if (latestData != null)
                         {
+                            latestData.PrintProperties();
                             // converting the datatypes of the object and appending the StationId
                             // to prepare the Data for the upload
                             var record = DwdDtoConverter.Map(station.StationId, latestData);
@@ -69,7 +77,7 @@ namespace ApiJsonSqlServer
                         }
                     }
 
-                    Count++;                               
+                    countImport++;                               
 
                     await Task.Delay(200); // optional rate limiting
                 }
@@ -78,14 +86,16 @@ namespace ApiJsonSqlServer
                     Console.WriteLine($"Error for {station.StationKe}: {ex.Message}");
                 }
             }
-            // starts uploading to DB after all dailyRecords collected            
-            await exportService.ExportAsync(dailyRecords);
+            // starts uploading to DB after all dailyRecords collected;
+            // returns the number of rows added in the DB
+            var countUpload = await exportService.ExportAsync(dailyRecords);
 
-            //Console.Clear();
+            Console.Clear();
             Console.WriteLine("ApiParameterFetcher");
             Console.WriteLine("------------------");
 
-            Console.WriteLine(Count + " Stations were parsed");
+            Console.WriteLine(countImport + " Stations were succesfully parsed from DWD");
+            Console.WriteLine(countUpload + " Stations were succesfully transmitted to the Database");
 
             Console.WriteLine("------------------");
             Console.Write("Press any Key to quit");
