@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ApiJsonSqlServer.Domain;
+using DwdAzureSqlDataTransmitter.Domain;
 
-namespace ApiJsonSqlServer.Services.Export
+namespace DwdAzureSqlDataTransmitter.Services.Export
 {
     public class AzureDbClient
     {
@@ -11,18 +11,31 @@ namespace ApiJsonSqlServer.Services.Export
         {
             _context = context;
         }
-
-        public async Task<DateOnly?> GetLastDataAsync(int stationId)
+        // queries th DB;
+        // returns the latestDate or NULL if station not exists
+        // of each station in DB in a Dictionnary 
+        // equivalent SQL:
+        // SELECT StationId, MAX(Date) FROM WeatherRecords GROUP BY StationId
+        public async Task<Dictionary<int, DateOnly>> GetLastDatesAsync()
         {
             return await _context.WeatherRecords
-                .Where(w => w.StationId == stationId)
-                .MaxAsync(w => (DateOnly?)w.Date);
+                .GroupBy(w => w.StationId)
+                .Select(g => new
+                {
+                    StationId = g.Key,
+                    LastDate = g.Max(w => w.Date)
+                })
+                .ToDictionaryAsync(x => x.StationId, x => x.LastDate);
         }
-
-        public async Task InsertRangeAsync(IEnumerable<WeatherRecord> records)
+        public async Task<int> InsertRangeAsync(IEnumerable<WeatherRecord> records)
         {
+            // Adds all entities to EF’s ChangeTracker & 
+            // marks them as "Added"; no DB call yet
             _context.WeatherRecords.AddRange(records);
-            await _context.SaveChangesAsync();
+            // generates the SQL INSERT statements,
+            // sends them to database & executes them;
+            // returns number of inserted rows
+            return await _context.SaveChangesAsync();
         }
     }
 }
