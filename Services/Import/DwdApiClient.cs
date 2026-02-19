@@ -1,4 +1,4 @@
-﻿namespace ApiJsonSqlServer.Services.Import
+﻿namespace DwdAzureSqlDataTransmitter.Services.Import
 {
     internal class DwdApiClient
     {

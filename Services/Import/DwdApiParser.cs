@@ -1,7 +1,7 @@
-﻿using ApiJsonSqlServer.Models;
+﻿using DwdAzureSqlDataTransmitter.Models;
 using System.Text.Json;
 
-namespace ApiJsonSqlServer.Services.Import
+namespace DwdAzureSqlDataTransmitter.Services.Import
 {
     internal class DwdApiParser
     {

@@ -1,7 +1,7 @@
-﻿using ApiJsonSqlServer.Domain;
+﻿using DwdAzureSqlDataTransmitter.Domain;
 using System.Globalization;
 
-namespace ApiJsonSqlServer.Services
+namespace DwdAzureSqlDataTransmitter.Services
 {
     internal class CsvReader
     {

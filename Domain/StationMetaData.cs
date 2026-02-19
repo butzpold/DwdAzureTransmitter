@@ -1,4 +1,4 @@
-﻿namespace ApiJsonSqlServer.Domain
+﻿namespace DwdAzureSqlDataTransmitter.Domain
 {
     internal class StationMetaData
     {

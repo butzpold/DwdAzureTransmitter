@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ApiJsonSqlServer.Domain;
+using DwdAzureSqlDataTransmitter.Domain;
 
-namespace ApiJsonSqlServer.Services.Export
+namespace DwdAzureSqlDataTransmitter.Services.Export
 {
     public class AzureDbContext : DbContext
     {

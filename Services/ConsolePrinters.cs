@@ -1,7 +1,7 @@
-﻿using ApiJsonSqlServer.Models;
+﻿using DwdAzureSqlDataTransmitter.Models;
 using System.Reflection;
 
-namespace ApiJsonSqlServer.Services
+namespace DwdAzureSqlDataTransmitter.Services
 {
     internal static class Extensions
     {

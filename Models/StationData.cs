@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ApiJsonSqlServer.Models
+namespace DwdAzureSqlDataTransmitter.Models
 {
     internal class StationData
     {
